@@ -18,12 +18,10 @@ export default function Navbar() {
     };
     updateAuth();
     window.addEventListener('storage', updateAuth);
-    router.events?.on?.('routeChangeComplete', updateAuth);
     return () => {
       window.removeEventListener('storage', updateAuth);
-      router.events?.off?.('routeChangeComplete', updateAuth);
     };
-  }, [router]);
+  }, []);
 
   const handleLogout = () => {
     localStorage.clear();

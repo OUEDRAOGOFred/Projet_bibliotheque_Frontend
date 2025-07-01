@@ -74,7 +74,9 @@ export default function LivreDetailPage() {
       setMoyenne(data.moyenne);
       // Pré-remplir si l'utilisateur a déjà commenté
       if (userId) {
-        const monCom = data.commentaires.find(c => String(c.utilisateur_id) === String(userId));
+        const monCom = Array.isArray(data.commentaires)
+          ? data.commentaires.find((c: Commentaire) => String(c.utilisateur_id) === String(userId))
+          : undefined;
         if (monCom) {
           setMonCommentaire(monCom.commentaire || "");
           setMaNote(monCom.note || 0);
@@ -120,7 +122,7 @@ export default function LivreDetailPage() {
     }
   };
 
-  const handleCommentSubmit = async (e) => {
+  const handleCommentSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessage("");
     setError("");
@@ -131,6 +133,10 @@ export default function LivreDetailPage() {
     }
     if (!maNote) {
       setError("Merci de donner une note.");
+      return;
+    }
+    if (!livre) {
+      setError("Livre introuvable.");
       return;
     }
     try {
