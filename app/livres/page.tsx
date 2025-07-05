@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { API_ENDPOINTS } from '../config/api';
+import { API_ENDPOINTS, fetchWithAuth } from '../config/api';
 
 interface Livre {
   id: number;
@@ -27,6 +27,7 @@ export default function LivresPage() {
   const [genre, setGenre] = useState('Tous');
   const [disponibilite, setDisponibilite] = useState('Tous');
   const [sort, setSort] = useState('titre');
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -70,6 +71,27 @@ export default function LivresPage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     fetchLivres();
+  };
+
+  const handleEmprunt = async (livre: Livre) => {
+    setError('');
+    setMessage('');
+    try {
+      const res = await fetchWithAuth(API_ENDPOINTS.EMPRUNTS, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ livre_id: livre.id })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMessage('Livre emprunté avec succès !');
+        fetchLivres();
+      } else {
+        setError(data.message || 'Erreur lors de l\'emprunt');
+      }
+    } catch (err) {
+      setError('Erreur lors de l\'emprunt');
+    }
   };
 
   return (
@@ -130,9 +152,14 @@ export default function LivresPage() {
             <span className="text-gray-500 text-sm ml-auto">{livres.length} résultat{livres.length > 1 ? 's' : ''} trouvé{livres.length > 1 ? 's' : ''}</span>
           </div>
         </div>
+        {message && (
+          <div className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-md text-green-700 font-semibold shadow">
+            {message}
+          </div>
+        )}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-md">
-            <p className="text-red-700">{error}</p>
+          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-md text-red-700 font-semibold shadow">
+            {error}
           </div>
         )}
         {loading ? (
@@ -147,15 +174,15 @@ export default function LivresPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {livres.map((livre) => (
-              <div key={livre.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
+              <div key={livre.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow flex flex-col border border-gray-100">
                 <div className="p-6 flex-1 flex flex-col">
                   <div className="flex items-center justify-between mb-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${
                       livre.disponible 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-green-100 text-green-800 border border-green-200' 
+                        : 'bg-red-100 text-red-800 border border-red-200'
                     }`}>
                       {livre.disponible ? 'Disponible' : 'Indisponible'}
                     </span>
@@ -175,17 +202,21 @@ export default function LivresPage() {
                   <div className="mt-auto flex flex-col gap-2">
                     <Link
                       href={`/livres/${livre.id}`}
-                      className="bg-[#003087] text-white px-4 py-2 rounded-md hover:bg-[#00256e] transition-colors text-sm text-center"
+                      className="bg-[#003087] text-white px-4 py-2 rounded-md hover:bg-[#00256e] transition-colors text-sm text-center font-semibold shadow"
                     >
                       Voir détails
                     </Link>
-                    {livre.disponible && (
-                      <button
-                        className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors text-sm"
-                      >
-                        Emprunter
-                      </button>
-                    )}
+                    <button
+                      className={`px-4 py-2 rounded-md text-sm font-semibold shadow transition-colors ${
+                        livre.disponible
+                          ? 'bg-green-500 text-white hover:bg-green-600'
+                          : 'bg-gray-300 text-gray-400 cursor-not-allowed'
+                      }`}
+                      onClick={() => livre.disponible && handleEmprunt(livre)}
+                      disabled={!livre.disponible}
+                    >
+                      {livre.disponible ? 'Emprunter' : 'Indisponible'}
+                    </button>
                   </div>
                 </div>
               </div>
