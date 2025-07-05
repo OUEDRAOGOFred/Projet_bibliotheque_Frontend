@@ -373,6 +373,145 @@ export default function LivreDetailPage() {
             {error && <div className="text-red-700 mt-2">{error}</div>}
           </form>
         )}
+
+        {/* Formulaire d'édition (admin uniquement) */}
+        {typeof window !== 'undefined' && localStorage.getItem('userRole') === 'admin' && livre && (
+          <div className="mt-8 p-6 bg-yellow-50 rounded-lg shadow-md">
+            <h3 className="text-lg font-bold mb-4 text-yellow-800">Modifier ce livre (admin)</h3>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setMessage('');
+                setError('');
+                const token = localStorage.getItem('token');
+                if (!token) {
+                  setError('Vous devez être connecté.');
+                  return;
+                }
+                try {
+                  const res = await fetch(`${API_ENDPOINTS.LIVRES}/${livre.id}`, {
+                    method: 'PUT',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(livre)
+                  });
+                  const data = await res.json();
+                  if (res.ok) {
+                    setMessage('Livre modifié avec succès !');
+                    // Rafraîchir les infos du livre
+                    setLivre({ ...livre });
+                  } else {
+                    setError(data.message || 'Erreur lors de la modification');
+                  }
+                } catch (err) {
+                  setError('Erreur réseau lors de la modification.');
+                }
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block font-semibold">Titre</label>
+                <input type="text" value={livre.titre} onChange={e => setLivre({ ...livre, titre: e.target.value })} className="border rounded px-2 py-1 w-full" required />
+              </div>
+              <div>
+                <label className="block font-semibold">Auteur</label>
+                <input type="text" value={livre.auteur} onChange={e => setLivre({ ...livre, auteur: e.target.value })} className="border rounded px-2 py-1 w-full" required />
+              </div>
+              <div>
+                <label className="block font-semibold">Genre</label>
+                <input type="text" value={livre.genre} onChange={e => setLivre({ ...livre, genre: e.target.value })} className="border rounded px-2 py-1 w-full" required />
+              </div>
+              <div>
+                <label className="block font-semibold">Description</label>
+                <textarea value={livre.description} onChange={e => setLivre({ ...livre, description: e.target.value })} className="border rounded px-2 py-1 w-full" rows={3} required />
+              </div>
+              <div>
+                <label className="block font-semibold">Disponible</label>
+                <select value={livre.disponible ? 'true' : 'false'} onChange={e => setLivre({ ...livre, disponible: e.target.value === 'true' })} className="border rounded px-2 py-1 w-full">
+                  <option value="true">Oui</option>
+                  <option value="false">Non</option>
+                </select>
+              </div>
+              <button type="submit" className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">Enregistrer les modifications</button>
+              {error && <div className="text-red-700 mt-2">{error}</div>}
+              {message && <div className="text-green-700 mt-2">{message}</div>}
+            </form>
+          </div>
+        )}
+
+        {/* Formulaire d'ajout de livre (admin uniquement) */}
+        {typeof window !== 'undefined' && localStorage.getItem('userRole') === 'admin' && (
+          <div className="mt-8 p-6 bg-green-50 rounded-lg shadow-md">
+            <h3 className="text-lg font-bold mb-4 text-green-800">Ajouter un nouveau livre (admin)</h3>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setMessage('');
+                setError('');
+                const token = localStorage.getItem('token');
+                if (!token) {
+                  setError('Vous devez être connecté.');
+                  return;
+                }
+                const form = e.target as HTMLFormElement;
+                const titre = (form.elements.namedItem('titre') as HTMLInputElement).value;
+                const auteur = (form.elements.namedItem('auteur') as HTMLInputElement).value;
+                const genre = (form.elements.namedItem('genre') as HTMLInputElement).value;
+                const description = (form.elements.namedItem('description') as HTMLInputElement).value;
+                const disponible = (form.elements.namedItem('disponible') as HTMLSelectElement).value === 'true';
+                try {
+                  const res = await fetch(API_ENDPOINTS.LIVRES, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ titre, auteur, genre, description, disponible })
+                  });
+                  const data = await res.json();
+                  if (res.ok) {
+                    setMessage('Livre ajouté avec succès !');
+                    // Optionnel : rediriger ou rafraîchir la page
+                  } else {
+                    setError(data.message || 'Erreur lors de l\'ajout');
+                  }
+                } catch (err) {
+                  setError('Erreur réseau lors de l\'ajout.');
+                }
+              }}
+              className="space-y-4 mt-6"
+            >
+              <div>
+                <label className="block font-semibold">Titre</label>
+                <input type="text" name="titre" className="border rounded px-2 py-1 w-full" required />
+              </div>
+              <div>
+                <label className="block font-semibold">Auteur</label>
+                <input type="text" name="auteur" className="border rounded px-2 py-1 w-full" required />
+              </div>
+              <div>
+                <label className="block font-semibold">Genre</label>
+                <input type="text" name="genre" className="border rounded px-2 py-1 w-full" required />
+              </div>
+              <div>
+                <label className="block font-semibold">Description</label>
+                <textarea name="description" className="border rounded px-2 py-1 w-full" rows={3} required />
+              </div>
+              <div>
+                <label className="block font-semibold">Disponible</label>
+                <select name="disponible" className="border rounded px-2 py-1 w-full">
+                  <option value="true">Oui</option>
+                  <option value="false">Non</option>
+                </select>
+              </div>
+              <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Ajouter le livre</button>
+              {error && <div className="text-red-700 mt-2">{error}</div>}
+              {message && <div className="text-green-700 mt-2">{message}</div>}
+            </form>
+          </div>
+        )}
       </main>
     </div>
   );
