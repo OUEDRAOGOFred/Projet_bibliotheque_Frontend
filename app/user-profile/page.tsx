@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { API_ENDPOINTS } from '../config/api';
 
 interface UserProfile {
   id: number;
@@ -15,9 +16,11 @@ interface UserProfile {
 interface Emprunt {
   id: number;
   livre_titre: string;
+  livre_auteur?: string;
   date_emprunt: string;
   date_retour_prevue: string;
   retourne: boolean;
+  date_retour?: string;
 }
 
 export default function UserProfilePage() {
@@ -26,17 +29,16 @@ export default function UserProfilePage() {
   const [emprunts, setEmprunts] = useState<Emprunt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userEmail = localStorage.getItem('userEmail');
-    
     if (!token) {
       router.push('/login');
       return;
     }
-
-    // Simuler le chargement du profil utilisateur
+    // Charger le profil (à adapter si API dédiée)
     setProfile({
       id: 1,
       nom: 'Utilisateur',
@@ -44,20 +46,42 @@ export default function UserProfilePage() {
       email: userEmail || 'user@example.com',
       role: localStorage.getItem('userRole') || 'user'
     });
-
-    // Simuler le chargement des emprunts
-    setEmprunts([
-      {
-        id: 1,
-        livre_titre: 'Exemple de livre',
-        date_emprunt: '2024-01-15',
-        date_retour_prevue: '2024-02-15',
-        retourne: false
-      }
-    ]);
-
-    setLoading(false);
+    fetchEmprunts();
   }, [router]);
+
+  const fetchEmprunts = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_ENDPOINTS.EMPRUNTS}/mes`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Erreur lors du chargement des emprunts');
+      const data = await res.json();
+      setEmprunts(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      setError(err.message || 'Erreur de connexion');
+    }
+    setLoading(false);
+  };
+
+  const handleRetour = async (empruntId: number) => {
+    setMessage('');
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_ENDPOINTS.EMPRUNTS}/retour`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ emprunt_id: empruntId })
+      });
+      if (!res.ok) throw new Error('Erreur lors du retour du livre');
+      setMessage('Livre rendu !');
+      fetchEmprunts();
+    } catch (err: any) {
+      setError(err.message || 'Erreur de connexion');
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -92,7 +116,6 @@ export default function UserProfilePage() {
                 Déconnexion
               </button>
             </div>
-            
             {profile && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -116,7 +139,6 @@ export default function UserProfilePage() {
                     </div>
                   </div>
                 </div>
-                
                 <div>
                   <h2 className="text-xl font-semibold text-gray-800 mb-4">Statistiques</h2>
                   <div className="space-y-3">
@@ -139,33 +161,63 @@ export default function UserProfilePage() {
           {/* Liste des emprunts */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-2xl font-bold text-[#003087] mb-6">Mes Emprunts</h2>
-            
+            {message && (
+              <div className="mb-4 p-3 bg-green-50 border-l-4 border-green-500 rounded-md shadow-md">
+                <p className="text-green-700">{message}</p>
+              </div>
+            )}
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border-l-4 border-red-500 rounded-md shadow-md">
+                <p className="text-red-700">{error}</p>
+              </div>
+            )}
             {emprunts.length === 0 ? (
               <p className="text-gray-600 text-center py-8">Aucun emprunt pour le moment.</p>
             ) : (
-              <div className="space-y-4">
-                {emprunts.map((emprunt) => (
-                  <div key={emprunt.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-semibold text-gray-900">{emprunt.livre_titre}</h3>
-                        <p className="text-sm text-gray-600">
-                          Emprunté le {new Date(emprunt.date_emprunt).toLocaleDateString('fr-FR')}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Retour prévu le {new Date(emprunt.date_retour_prevue).toLocaleDateString('fr-FR')}
-                        </p>
-                      </div>
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        emprunt.retourne 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {emprunt.retourne ? 'Retourné' : 'En cours'}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titre</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Auteur</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date d'emprunt</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date limite</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date de retour</th>
+                      <th className="px-4 py-2"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {emprunts.map((emprunt) => (
+                      <tr key={emprunt.id}>
+                        <td className="px-4 py-2 font-semibold">{emprunt.livre_titre || '-'}</td>
+                        <td className="px-4 py-2">{emprunt.livre_auteur || '-'}</td>
+                        <td className="px-4 py-2">{emprunt.date_emprunt ? new Date(emprunt.date_emprunt).toLocaleDateString('fr-FR') : '-'}</td>
+                        <td className="px-4 py-2">{emprunt.date_retour_prevue ? new Date(emprunt.date_retour_prevue).toLocaleDateString('fr-FR') : '-'}</td>
+                        <td className="px-4 py-2">
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            emprunt.retourne
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {emprunt.retourne ? 'Rendu' : 'Emprunté'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2">{emprunt.date_retour ? new Date(emprunt.date_retour).toLocaleDateString('fr-FR') : '-'}</td>
+                        <td className="px-4 py-2">
+                          {!emprunt.retourne && (
+                            <button
+                              onClick={() => handleRetour(emprunt.id)}
+                              className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors text-xs"
+                            >
+                              Retour
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>

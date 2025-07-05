@@ -18,7 +18,7 @@ export const API_ENDPOINTS = {
   EMPRUNTS: `${API_BASE_URL}/emprunts`,
   
   // Utilisateurs
-  USERS: `${API_BASE_URL}/users`,
+  USERS: `${API_BASE_URL}/api/users`,
   USER_PROFILE: `${API_BASE_URL}/user-profile`,
 };
 
