@@ -98,6 +98,10 @@ export default function LivresPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-6 py-8">
         <div className="mb-8">
+          <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-md mb-4">
+            <h2 className="text-xl font-bold text-[#003087] mb-1">Bienvenue dans le catalogue de la bibliothèque !</h2>
+            <p className="text-gray-700">Découvrez, recherchez et empruntez des livres parmi toutes nos collections. Bonne lecture !</p>
+          </div>
           <h1 className="text-3xl font-bold text-[#003087] mb-4">Catalogue des Livres</h1>
           <h2 className="text-lg font-semibold text-gray-800 mb-2">Recherche de livre</h2>
           <form onSubmit={handleSearch} className="mb-6 flex flex-col md:flex-row gap-4 items-center">

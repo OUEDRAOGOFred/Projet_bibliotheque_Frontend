@@ -19,6 +19,8 @@ export default function UserListPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [editingUserId, setEditingUserId] = useState<number | null>(null);
+  const [editForm, setEditForm] = useState<{ nom: string; prenom: string; email: string; role: string }>({ nom: '', prenom: '', email: '', role: 'user' });
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -92,6 +94,38 @@ export default function UserListPage() {
     } catch (err) {
       alert('Erreur de connexion');
     }
+  };
+
+  const handleEditClick = (user: User) => {
+    setEditingUserId(user.id);
+    setEditForm({ nom: user.nom, prenom: user.prenom, email: user.email, role: user.role });
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+  };
+
+  const handleEditSave = async (userId: number) => {
+    try {
+      const response = await fetchWithAuth(`${API_ENDPOINTS.USERS}/${userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm)
+      });
+      if (response.ok) {
+        setUsers(users.map(u => u.id === userId ? { ...u, ...editForm } : u));
+        setEditingUserId(null);
+        alert('Utilisateur modifié avec succès');
+      } else {
+        alert('Erreur lors de la modification');
+      }
+    } catch (err) {
+      alert('Erreur de connexion');
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditingUserId(null);
   };
 
   if (loading) {
@@ -177,46 +211,108 @@ export default function UserListPage() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {users.map((user) => (
                       <tr key={user.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 h-10 w-10">
-                              <div className="h-10 w-10 rounded-full bg-[#003087] flex items-center justify-center">
-                                <span className="text-white font-medium">
-                                  {user.prenom.charAt(0)}{user.nom.charAt(0)}
-                                </span>
+                        {editingUserId === user.id ? (
+                          <>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <input
+                                type="text"
+                                name="prenom"
+                                value={editForm.prenom}
+                                onChange={handleEditChange}
+                                className="border rounded px-2 py-1 w-20"
+                                placeholder="Prénom"
+                              />
+                              <input
+                                type="text"
+                                name="nom"
+                                value={editForm.nom}
+                                onChange={handleEditChange}
+                                className="border rounded px-2 py-1 w-20 ml-2"
+                                placeholder="Nom"
+                              />
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              <input
+                                type="email"
+                                name="email"
+                                value={editForm.email}
+                                onChange={handleEditChange}
+                                className="border rounded px-2 py-1 w-40"
+                                placeholder="Email"
+                              />
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <select
+                                name="role"
+                                value={editForm.role}
+                                onChange={handleEditChange}
+                                className="text-sm border border-gray-300 rounded-md px-2 py-1"
+                              >
+                                <option value="user">Utilisateur</option>
+                                <option value="admin">Administrateur</option>
+                              </select>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {user.created_at ? new Date(user.created_at).toLocaleDateString('fr-FR') : 'N/A'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <button onClick={() => handleEditSave(user.id)} className="text-green-600 hover:text-green-900 mr-2">Enregistrer</button>
+                              <button onClick={handleEditCancel} className="text-gray-600 hover:text-gray-900">Annuler</button>
+                            </td>
+                          </>
+                        ) : (
+                          <>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <div className="flex-shrink-0 h-10 w-10">
+                                  <div className="h-10 w-10 rounded-full bg-[#003087] flex items-center justify-center">
+                                    <span className="text-white font-medium">
+                                      {user.prenom.charAt(0)}{user.nom.charAt(0)}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="ml-4">
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {user.prenom} {user.nom}
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">
-                                {user.prenom} {user.nom}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.email}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <select
-                            value={user.role}
-                            onChange={(e) => handleChangeRole(user.id, e.target.value)}
-                            className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#003087]"
-                          >
-                            <option value="user">Utilisateur</option>
-                            <option value="admin">Administrateur</option>
-                          </select>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {user.created_at ? new Date(user.created_at).toLocaleDateString('fr-FR') : 'N/A'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button
-                            onClick={() => handleDeleteUser(user.id)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            Supprimer
-                          </button>
-                        </td>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {user.email}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <select
+                                value={user.role}
+                                onChange={(e) => handleChangeRole(user.id, e.target.value)}
+                                className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#003087]"
+                                disabled={editingUserId !== null}
+                              >
+                                <option value="user">Utilisateur</option>
+                                <option value="admin">Administrateur</option>
+                              </select>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {user.created_at ? new Date(user.created_at).toLocaleDateString('fr-FR') : 'N/A'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <button
+                                onClick={() => handleEditClick(user)}
+                                className="text-blue-600 hover:text-blue-900 mr-2"
+                                disabled={editingUserId !== null}
+                              >
+                                Modifier
+                              </button>
+                              <button
+                                onClick={() => handleDeleteUser(user.id)}
+                                className="text-red-600 hover:text-red-900"
+                                disabled={editingUserId !== null}
+                              >
+                                Supprimer
+                              </button>
+                            </td>
+                          </>
+                        )}
                       </tr>
                     ))}
                   </tbody>
