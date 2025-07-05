@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { APP_TEXTS } from '../constants/texts';
+import { API_ENDPOINTS } from '../config/api';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,7 +36,7 @@ export default function LoginPage() {
     setLoading(true);
     
     try {
-      const res = await fetch('http://localhost:4400/userlogin', {
+      const res = await fetch(API_ENDPOINTS.LOGIN, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, mot_de_passe: motDePasse })

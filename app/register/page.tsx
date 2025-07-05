@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { API_ENDPOINTS } from '../config/api';
 
 // Import Poppins font (add this to your _app.js or via CDN in HTML)
 import { Poppins } from "next/font/google";
@@ -59,7 +60,7 @@ function Register() {
     e.preventDefault();
     if (!validate()) return;
     const userData = { nom, prenom, email, mot_de_passe: password };
-    const response = await fetch("http://localhost:4400/signup", {
+    const response = await fetch(API_ENDPOINTS.SIGNUP, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData),

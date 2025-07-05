@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface Livre {
   id: number;
@@ -49,7 +50,7 @@ export default function LivreDetailPage() {
       return;
     }
 
-    fetch(`http://localhost:4400/livres/${id}`, {
+    fetch(API_ENDPOINTS.LIVRE_BY_ID(id as string), {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -68,7 +69,7 @@ export default function LivreDetailPage() {
   const fetchCommentaires = async () => {
     setLoadingCommentaires(true);
     try {
-      const res = await fetch(`http://localhost:4400/commentaires/${id}`);
+      const res = await fetch(API_ENDPOINTS.COMMENTAIRES_BY_LIVRE(id as string));
       const data = await res.json();
       setCommentaires(data.commentaires);
       setMoyenne(data.moyenne);
@@ -101,7 +102,7 @@ export default function LivreDetailPage() {
     }
     
     try {
-      const res = await fetch('http://localhost:4400/emprunts', {
+      const res = await fetch(API_ENDPOINTS.EMPRUNTS, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -140,7 +141,7 @@ export default function LivreDetailPage() {
       return;
     }
     try {
-      const res = await fetch("http://localhost:4400/commentaires", {
+      const res = await fetch(API_ENDPOINTS.COMMENTAIRES, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
