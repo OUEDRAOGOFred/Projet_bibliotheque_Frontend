@@ -1,5 +1,5 @@
 // Configuration de l'API Backend
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4400';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://projet-librairie-backend.onrender.com';
 
 export const API_ENDPOINTS = {
   // Authentification
