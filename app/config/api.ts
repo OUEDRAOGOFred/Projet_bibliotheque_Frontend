@@ -22,4 +22,30 @@ export const API_ENDPOINTS = {
   USER_PROFILE: `${API_BASE_URL}/user-profile`,
 };
 
-export default API_ENDPOINTS; 
+export default API_ENDPOINTS;
+
+/**
+ * Fonction utilitaire pour faire des requêtes fetch avec le token automatiquement
+ * et gérer les erreurs 403 (déconnexion + message utilisateur)
+ */
+export async function fetchWithAuth(url: string, options: any = {}) {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('token');
+    if (!options.headers) options.headers = {};
+    if (token) {
+      options.headers['Authorization'] = `Bearer ${token}`;
+    }
+  }
+  const response = await fetch(url, options);
+  if (response.status === 403) {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userRole');
+      alert('Accès refusé : vous avez été déconnecté. Veuillez vous reconnecter.');
+      window.location.href = '/login';
+    }
+    throw new Error('Accès refusé (403)');
+  }
+  return response;
+} 

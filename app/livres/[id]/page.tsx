@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { API_ENDPOINTS } from '../../config/api';
+import { API_ENDPOINTS, fetchWithAuth } from '../../config/api';
 
 interface Livre {
   id: number;
@@ -50,11 +50,7 @@ export default function LivreDetailPage() {
       return;
     }
 
-    fetch(API_ENDPOINTS.LIVRE_BY_ID(id as string), {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
+    fetchWithAuth(API_ENDPOINTS.LIVRE_BY_ID(id as string))
       .then(res => res.json())
       .then(data => {
         setLivre(data);
@@ -69,7 +65,7 @@ export default function LivreDetailPage() {
   const fetchCommentaires = async () => {
     setLoadingCommentaires(true);
     try {
-      const res = await fetch(API_ENDPOINTS.COMMENTAIRES_BY_LIVRE(id as string));
+      const res = await fetchWithAuth(API_ENDPOINTS.COMMENTAIRES_BY_LIVRE(id as string));
       const data = await res.json();
       setCommentaires(data.commentaires);
       setMoyenne(data.moyenne);
@@ -102,11 +98,10 @@ export default function LivreDetailPage() {
     }
     
     try {
-      const res = await fetch(API_ENDPOINTS.EMPRUNTS, {
+      const res = await fetchWithAuth(API_ENDPOINTS.EMPRUNTS, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ livre_id: livre?.id })
       });
@@ -141,11 +136,10 @@ export default function LivreDetailPage() {
       return;
     }
     try {
-      const res = await fetch(API_ENDPOINTS.COMMENTAIRES, {
+      const res = await fetchWithAuth(API_ENDPOINTS.COMMENTAIRES, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({ livre_id: livre.id, commentaire: monCommentaire, note: maNote }),
       });
@@ -389,11 +383,10 @@ export default function LivreDetailPage() {
                   return;
                 }
                 try {
-                  const res = await fetch(`${API_ENDPOINTS.LIVRES}/${livre.id}`, {
+                  const res = await fetchWithAuth(`${API_ENDPOINTS.LIVRES}/${livre.id}`, {
                     method: 'PUT',
                     headers: {
-                      'Content-Type': 'application/json',
-                      'Authorization': `Bearer ${token}`
+                      'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(livre)
                   });
@@ -462,11 +455,10 @@ export default function LivreDetailPage() {
                 const description = (form.elements.namedItem('description') as HTMLInputElement).value;
                 const disponible = (form.elements.namedItem('disponible') as HTMLSelectElement).value === 'true';
                 try {
-                  const res = await fetch(API_ENDPOINTS.LIVRES, {
+                  const res = await fetchWithAuth(API_ENDPOINTS.LIVRES, {
                     method: 'POST',
                     headers: {
-                      'Content-Type': 'application/json',
-                      'Authorization': `Bearer ${token}`
+                      'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ titre, auteur, genre, description, disponible })
                   });

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { API_ENDPOINTS } from '../config/api';
+import { API_ENDPOINTS, fetchWithAuth } from '../config/api';
 
 interface UserProfile {
   id: number;
@@ -53,10 +53,7 @@ export default function UserProfilePage() {
     setLoading(true);
     setError('');
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${API_ENDPOINTS.EMPRUNTS}/mes`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await fetchWithAuth(`${API_ENDPOINTS.EMPRUNTS}/mes`);
       if (!res.ok) throw new Error('Erreur lors du chargement des emprunts');
       const data = await res.json();
       setEmprunts(Array.isArray(data) ? data : []);
@@ -69,10 +66,9 @@ export default function UserProfilePage() {
   const handleRetour = async (empruntId: number) => {
     setMessage('');
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${API_ENDPOINTS.EMPRUNTS}/retour`, {
+      const res = await fetchWithAuth(`${API_ENDPOINTS.EMPRUNTS}/retour`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ emprunt_id: empruntId })
       });
       if (!res.ok) throw new Error('Erreur lors du retour du livre');

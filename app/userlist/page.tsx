@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { API_ENDPOINTS } from '../config/api';
+import { API_ENDPOINTS, fetchWithAuth } from '../config/api';
 
 interface User {
   id: number;
@@ -39,13 +39,7 @@ export default function UserListPage() {
 
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(API_ENDPOINTS.USERS, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
+      const response = await fetchWithAuth(API_ENDPOINTS.USERS);
       if (response.ok) {
         const data = await response.json();
         setUsers(Array.isArray(data) ? data : []);
@@ -63,16 +57,10 @@ export default function UserListPage() {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
       return;
     }
-
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_ENDPOINTS.USERS}/${userId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const response = await fetchWithAuth(`${API_ENDPOINTS.USERS}/${userId}`, {
+        method: 'DELETE'
       });
-
       if (response.ok) {
         setUsers(users.filter(user => user.id !== userId));
         alert('Utilisateur supprimé avec succès');
@@ -86,16 +74,13 @@ export default function UserListPage() {
 
   const handleChangeRole = async (userId: number, newRole: string) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_ENDPOINTS.USERS}/${userId}`, {
+      const response = await fetchWithAuth(`${API_ENDPOINTS.USERS}/${userId}`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ role: newRole })
       });
-
       if (response.ok) {
         setUsers(users.map(user => 
           user.id === userId ? { ...user, role: newRole } : user

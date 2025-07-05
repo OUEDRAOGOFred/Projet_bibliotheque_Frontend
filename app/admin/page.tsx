@@ -124,6 +124,7 @@ export default function AdminPage() {
             </Link>
             <button
               className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 font-semibold"
+              onClick={() => router.push('/livres/nouveau')}
             >
               Ajouter un livre
             </button>
@@ -165,7 +166,9 @@ export default function AdminPage() {
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${livre.disponible ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{livre.disponible ? 'Oui' : 'Non'}</span>
                       </td>
                       <td className="px-4 py-2 flex gap-2">
-                        <button className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-xs">Modifier</button>
+                        <button className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-xs"
+                          onClick={() => router.push(`/livres/${livre.id}`)}
+                        >Modifier</button>
                         <button onClick={() => handleDelete(livre.id)} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-xs">Supprimer</button>
                       </td>
                     </tr>
