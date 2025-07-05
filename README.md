@@ -58,7 +58,7 @@ npm run dev
 Lors du premier déploiement, un administrateur par défaut est automatiquement créé :
 
 - **Email** : `admin@2ie.edu.bf`
-- **Mot de passe** : `admin1234`
+- **Mot de passe** : `admin123`
 
 > **Pensez à changer ce mot de passe après la première connexion pour des raisons de sécurité !**
 
