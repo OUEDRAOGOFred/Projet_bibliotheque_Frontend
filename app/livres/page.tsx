@@ -99,6 +99,7 @@ export default function LivresPage() {
       <div className="container mx-auto px-6 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[#003087] mb-4">Catalogue des Livres</h1>
+          <h2 className="text-lg font-semibold text-gray-800 mb-2">Recherche de livre</h2>
           <form onSubmit={handleSearch} className="mb-6 flex flex-col md:flex-row gap-4 items-center">
             <input
               type="text"
