@@ -19,6 +19,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [notifMessage, setNotifMessage] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -74,21 +75,19 @@ export default function AdminPage() {
     }
   };
 
-  const handleNotifierRetards = async () => {
-    setMessage('');
+  const handleNotifyLate = async () => {
+    setNotifMessage('');
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_ENDPOINTS.EMPRUNTS}/retards/notifier`, {
+      const res = await fetch('https://projet-librairie-backend.onrender.com/emprunts/retards/notifier', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (response.ok) {
-        setMessage('Notifications envoyées !');
-      } else {
-        setError('Erreur lors de la notification');
-      }
-    } catch (err) {
-      setError('Erreur de connexion');
+      const data = await res.json();
+      if (res.ok) setNotifMessage(data.message || 'Emails envoyés avec succès !');
+      else setNotifMessage(data.message || 'Erreur lors de l\'envoi des emails');
+    } catch (e) {
+      setNotifMessage('Erreur de connexion au serveur');
     }
   };
 
@@ -97,13 +96,11 @@ export default function AdminPage() {
       <div className="container mx-auto px-6 py-8">
         <div className="bg-white rounded-lg shadow-md p-6">
           <h1 className="text-3xl font-bold text-[#003087] mb-6">Gestion des livres</h1>
-          <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
-            <button
-              onClick={handleNotifierRetards}
-              className="bg-yellow-400 text-[#003087] px-4 py-2 rounded-md hover:bg-yellow-500 font-semibold"
-            >
+          <div className="mb-6 flex flex-wrap gap-4 items-center">
+            <button onClick={handleNotifyLate} className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-4 py-2 rounded-md shadow">
               Notifier les retards
             </button>
+            {notifMessage && <span className="ml-4 text-sm font-semibold text-blue-700">{notifMessage}</span>}
             <Link
               href="/"
               className="ml-auto text-[#003087] hover:text-[#00256e] transition-colors"

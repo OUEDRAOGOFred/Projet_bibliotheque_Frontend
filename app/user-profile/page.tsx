@@ -18,7 +18,8 @@ interface Emprunt {
   livre_titre: string;
   livre_auteur?: string;
   date_emprunt: string;
-  date_retour_prevue: string;
+  date_limite?: string;
+  date_retour_prevue?: string;
   retourne: boolean;
   date_retour?: string;
 }
@@ -189,7 +190,7 @@ export default function UserProfilePage() {
                         <td className="px-4 py-2 font-semibold">{emprunt.livre_titre || '-'}</td>
                         <td className="px-4 py-2">{emprunt.livre_auteur || '-'}</td>
                         <td className="px-4 py-2">{emprunt.date_emprunt ? new Date(emprunt.date_emprunt).toLocaleDateString('fr-FR') : '-'}</td>
-                        <td className="px-4 py-2">{emprunt.date_retour_prevue ? new Date(emprunt.date_retour_prevue).toLocaleDateString('fr-FR') : '-'}</td>
+                        <td className="px-4 py-2">{emprunt.date_limite ? new Date(emprunt.date_limite).toLocaleDateString('fr-FR') : '-'}</td>
                         <td className="px-4 py-2">
                           <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                             emprunt.retourne
