@@ -39,36 +39,36 @@ export default function AjouterLivrePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-md p-8 max-w-lg w-full">
-        <h1 className="text-2xl font-bold text-[#003087] mb-6">Ajouter un nouveau livre</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center">
+      <div className="bg-white rounded-2xl shadow-2xl p-10 max-w-lg w-full border border-blue-100">
+        <h1 className="text-3xl font-extrabold text-[#003087] mb-8 text-center tracking-tight">Ajouter un nouveau livre</h1>
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block font-semibold">Titre</label>
-            <input type="text" name="titre" className="border rounded px-2 py-1 w-full" required />
+            <label className="block font-semibold text-gray-700 mb-1">Titre</label>
+            <input type="text" name="titre" className="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-[#003087] focus:border-[#003087] transition" required />
           </div>
           <div>
-            <label className="block font-semibold">Auteur</label>
-            <input type="text" name="auteur" className="border rounded px-2 py-1 w-full" required />
+            <label className="block font-semibold text-gray-700 mb-1">Auteur</label>
+            <input type="text" name="auteur" className="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-[#003087] focus:border-[#003087] transition" required />
           </div>
           <div>
-            <label className="block font-semibold">Genre</label>
-            <input type="text" name="genre" className="border rounded px-2 py-1 w-full" required />
+            <label className="block font-semibold text-gray-700 mb-1">Genre</label>
+            <input type="text" name="genre" className="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-[#003087] focus:border-[#003087] transition" required />
           </div>
           <div>
-            <label className="block font-semibold">Description</label>
-            <textarea name="description" className="border rounded px-2 py-1 w-full" rows={3} required />
+            <label className="block font-semibold text-gray-700 mb-1">Description</label>
+            <textarea name="description" className="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-[#003087] focus:border-[#003087] transition" rows={3} required />
           </div>
           <div>
-            <label className="block font-semibold">Disponible</label>
-            <select name="disponible" className="border rounded px-2 py-1 w-full">
+            <label className="block font-semibold text-gray-700 mb-1">Disponible</label>
+            <select name="disponible" className="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-[#003087] focus:border-[#003087] transition">
               <option value="true">Oui</option>
               <option value="false">Non</option>
             </select>
           </div>
-          <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Ajouter le livre</button>
-          {error && <div className="text-red-700 mt-2">{error}</div>}
-          {message && <div className="text-green-700 mt-2">{message}</div>}
+          <button type="submit" className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-2 rounded-lg shadow hover:from-green-600 hover:to-green-700 font-bold text-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400">Ajouter le livre</button>
+          {error && <div className="text-red-700 mt-2 text-center font-semibold animate-pulse">{error}</div>}
+          {message && <div className="text-green-700 mt-2 text-center font-semibold animate-bounce">{message}</div>}
         </form>
       </div>
     </div>
